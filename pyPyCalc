@@ -1,0 +1,121 @@
+def getNumber(prompt, lower, upper) :
+    response = -1
+    try :
+        response = float(input(prompt))
+    except ValueError:     
+        response = -1
+    while response < lower or upper < response :        
+        print("Please enter a valid number between ", lower, " and ", upper)    
+        try :
+            response = float(input(prompt))
+        except ValueError:     
+            print("Please enter a valid number between ", lower, " and ", upper)    
+    return response                
+
+def makeChoice(prompt, a, b) :
+    response = str(input(prompt).lower())
+    while response not in {a, b} : 
+        print("Please enter ", a.upper(), " or ", b.upper(), end=" ")
+        response = str(input().lower())        
+    return response
+
+def imperialPrint(pL, pD, pM, pMT, aPG, aPP, aM, aMT) :
+    print("The python would be ", "%.1f" % pL, " feet long")
+    print("It would be ", "%.2f" % pD, " feet thick")
+    print("It would weigh ", "%.0f" % pM, " pounds, or ", "%.2f" % pMT, " tons")
+    print("Armouring it would cost ", "%.0f" % aPG, " gold, or ", "%.0f" % aPP, " platinum")
+    print("The armour woud weigh ", "%.0f" % aM, " pounds, or ", "%.2f" % aMT, " tons")
+    
+def metricPrint(pL, pD, pM, pMT, aPG, aPP, aM, aMT) :
+    print("The python would be ", "%.1f" % pL, " meters long")
+    print("It would be ", "%.2f" % pD, " meters thick")
+    print("It would weigh ", "%.0f" % pM, " kilos, or ", "%.2f" % pMT, " tonnes")
+    print("Armouring it would cost ", "%.0f" % aPG, " gold, or ", "%.0f" % aPP, " platinum")
+    print("The armour woud weigh ", "%.0f" % aM, " kilos, or ", "%.2f" % aMT, " tonnes")
+
+def calculator() :
+    print("\n")
+    calc = 'y'
+    # Loop as long as you keep coming back
+    while calc == 'y' :
+        # Select a system of measurement
+        system = makeChoice("Do you want to use imperial or metric measurements? I/M ", 'i', 'm')
+        
+        # Assign defaut constants
+        lengthRatio = 19.93
+        armourCoverage = 0.6
+        if system == 'i' :
+            upscale = 0.000446429
+            pythonDensity = 30.675
+            armourRatio = 5/96
+            armourDensity = 493.1809
+            armourCost = 5     
+        else :
+            upscale = 0.001
+            pythonDensity = 491.366
+            armourRatio = 6.35/100                
+            armourDensity = 7900
+            armourCost = 11.0231
+        
+        # Gather necessary data
+        boxEdge = getNumber("How large is the size category box? ", 0.001, 1000)
+        serpentPacking = getNumber("What percentage of the box does the python take up? ", 0.001, 1)
+        customNumbers = makeChoice("Do you want to use custom proportions, densities, etc? Y/N ", 'y', 'n')
+        # Check if there are any custom constants
+        if customNumbers == 'y' :
+            # Custom length and width
+            setDimensions = makeChoice("Do you wish to set different reference dimensions? Y/N ", 'y', 'n')
+            if setDimensions == 'y' :
+                referenceLength = getNumber("Reference length? ", 'y', 'n')
+                referenceDiameter = getNumber("Reference diameter? ", 'y', 'n')
+                lengthRatio = referenceLength / referenceDiameter
+            # Custom density
+            setMass = makeChoice("Do you want to set a different density? Y/N ", 'y', 'n')
+            if setMass == 'y' :
+                # Density by definition or calculation
+                setDensity = makeChoice("Do you wish to set density directly, or by mass and length? D/M ", 'd', 'm')
+                if setDensity == 'd' :
+                    pythonDensity = getNumber("Density? ", 0.0001, 1000)
+                else :
+                    massLength = getNumber("Length? ", 0, 1000000)
+                    mass = getNumber("Mass? ", 0, 1000000)
+                    massRadius = (massLength / lengthRatio) / 2
+                    masssVolume = massLength * (3.1415 * (massRadius)**2)
+                    pythonDensity = mass / massVolume
+            # Custom armour values
+            setArmour = makeChoice("Do you want to set custom armour parameters? Y/N ", 'y', 'n')
+            if setArmour == 'y' :
+                # Armour thickess under both systems
+                if system == 'i' :
+                    armourRatio = getNumber("How thick would the armour be on a 6 foot thick python (ie. human height)? In inches ", 0, 96) / 96
+                else :
+                    armourRatio = getNumber("How thick would the armour be on a meter thick python (ie. waist high)? In cm ", 0, 100) / 100
+                armourDensity = getNumber("How dense is the armour? Per cubic unit ", 0, 10000000)
+                armourCost = getNumber("How much does the armour's material cost? Per cubic unit, in GP ", 0, 1000000)
+                armourCoverage = getNumber("How much of the snake's body would the armour cover? ", 0, 1)
+        
+        # Calculations
+        boxVolume = (boxEdge)**3
+        pythonVolume = boxVolume * serpentPacking
+        pythonLength = ((pythonVolume * (2 * lengthRatio)**2) / 3.1415)**(1/3)
+        pythonDiameter = pythonLength / lengthRatio
+        pythonMass = pythonVolume * pythonDensity
+        pythonMassTon = pythonMass * upscale
+        armourThickness = pythonDiameter * armourRatio
+        armourVolume = armourCoverage * ((((3.1415 * (pythonDiameter / 2) + armourThickness)**2) * pythonLength) - pythonVolume)
+        armourMass = armourVolume * armourDensity
+        armourMassTon = armourMass * upscale
+        armourPriceG = armourMass * armourCost
+        armourPriceP = armourPriceG / 10
+        
+        print("\n")
+
+        if system == 'i' :
+            imperialPrint(pythonLength, pythonDiameter, pythonMass, pythonMassTon, armourPriceG, armourPriceP, armourMass, armourMassTon)
+        else :
+            metricPrint(pythonLength, pythonDiameter, pythonMass, pythonMassTon, armourPriceG, armourPriceP, armourMass, armourMassTon)
+        
+        print("\n")
+        calc = makeChoice("Do you want to calculate another python? Y/N ", 'y', 'n')
+
+calculator()    
