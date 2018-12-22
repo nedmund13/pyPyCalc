@@ -59,7 +59,7 @@ def calculator() :
         
         # Gather necessary data
         boxEdge = getNumber("How large is the size category box? ", 0.001, 1000)
-        serpentPacking = getNumber("What percentage of the box does the python take up? ", 0.001, 1)
+        serpentPacking = getNumber("What proportion of the box does the python take up? ", 0.001, 1)
         customNumbers = makeChoice("Do you want to use custom proportions, densities, etc? Y/N ", 'y', 'n')
         # Check if there are any custom constants
         if customNumbers == 'y' :
